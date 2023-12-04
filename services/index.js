@@ -1,4 +1,8 @@
+
+
 const Contact = require("./schemas/ContactSchema");
+const User = require("./schemas/UserSchema");
+
 
 const getContacts = async () => {
   return Contact.find();
@@ -25,10 +29,71 @@ const updateContact = async (id, favoriteUpdate) => {
   console.log(id, favoriteUpdate);
   console.log(favoriteUpdate);
   return Contact.findByIdAndUpdate(
-    { _id: id },
+   {_id:id},
     { $set: favoriteUpdate },
     { new: true }
   );
+};
+
+
+
+
+const getUsers = async () => {
+  return User.find();
+};
+
+
+const createUser = async ({ email, password }) => {
+  try {
+    const userExistent = await User.findOne({ email });
+
+    if (userExistent) {
+      throw new Error("Acest email exista deja.");
+    }
+
+    const newUser = new User({ email, password });
+    newUser.setPassword(password);
+    return await newUser.save();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const userExists = async ({ email, password }) => {
+  try {
+    console.log(`Parola:${password}`);
+    const user = await User.findOne({ email });
+
+    // if (!user) {
+    //   throw new Error("User-ul nu exista in baza de date!");
+    // }
+    // if (user.password !== password) {
+    //   throw new Error("Parola este gresita");
+    // }
+
+    if (!user || !user.validPassword(password)) {
+      throw new Error("Email sau parola gresita!");
+    }
+
+    return user;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const updateUser = async (id, token) => {
+  console.log(id, token);
+  console.log(token);
+  return User.findByIdAndUpdate(
+   {_id:id},
+    { $set: token },
+    { new: true }
+  );
+};
+
+const userName = async (user) => {
+  const result = await User.findOne({ email: user.email },{subscription:user.subscription});
+  return result;
 };
 
 module.exports = {
@@ -38,4 +103,9 @@ module.exports = {
   deleteContact,
   changeContact,
   updateContact,
+  getUsers,
+  createUser,
+  updateUser,
+  userExists,
+  userName,
 };
