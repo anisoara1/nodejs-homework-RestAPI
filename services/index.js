@@ -81,6 +81,7 @@ const userExists = async ({ email, password }) => {
   }
 };
 
+
 const updateUser = async (id, token) => {
   console.log(id, token);
   console.log(token);
