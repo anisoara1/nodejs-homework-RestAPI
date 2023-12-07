@@ -2,6 +2,8 @@
 
 const Contact = require("./schemas/ContactSchema");
 const User = require("./schemas/UserSchema");
+const gravatar  = require ("gravatar")
+const bcryptjs = require("bcryptjs")
 
 
 const getContacts = async () => {
@@ -42,7 +44,6 @@ const getUsers = async () => {
   return User.find();
 };
 
-
 const createUser = async ({ email, password }) => {
   try {
     const userExistent = await User.findOne({ email });
@@ -50,9 +51,8 @@ const createUser = async ({ email, password }) => {
     if (userExistent) {
       throw new Error("Acest email exista deja.");
     }
-
-    const newUser = new User({ email, password });
-    newUser.setPassword(password);
+    const hash = bcryptjs.hashSync(password, 12);
+    const newUser = new User({ email, password:hash,  avatarURL: gravatar.url(email)});
     return await newUser.save();
   } catch (error) {
     console.log(error);
