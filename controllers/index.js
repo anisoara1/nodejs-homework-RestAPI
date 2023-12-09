@@ -322,7 +322,7 @@ const updateAvatar = async (req, res, next) => {
 
     const destinationPath = path.join(
       __dirname,
-      `../public/avatars/${uniqFilename}`
+      `/public/avatars/${uniqFilename}`
     ); // Se definește calea de destinație pentru fișierul final de avatar.
 
     // Utilizează Jimp pentru redimensionare, ajustarea calității și transformare în tonuri de gri
@@ -344,16 +344,21 @@ const updateAvatar = async (req, res, next) => {
       .catch((error) => {
         throw error; // Se aruncă o excepție în caz de eroare în timpul procesării imaginii cu Jimp.
       });
-
-    req.user.avatarUrl = `/avatars/${uniqFilename}`;
-    // Se actualizează calea avatarului în obiectul utilizatorului.
-   ; // Se salvează modificările în obiectul utilizatorului în baza de date.
- await req.user.save();
-    res.status(200).json({ avatarUrl: req.user.avatarUrl }); // Se trimite răspunsul HTTP cu URL-ul noului avatar.
-  } catch (error) {
-    res.status(404).json({ error: error.message }); // Se returnează o eroare 404 în caz de orice altă eroare și se trece la middleware-ul următor în lanț.
-    next(error);
-  }
+      
+      if (req.user) {
+       
+        req.user.avatarUrl = `/avatars/${uniqFilename}`;
+        await req.user.save();
+        res.status(200).json({ avatarUrl: req.user.avatarUrl });
+      } else {
+        res.status(404).json({ error: "Utilizatorul nu a fost gasit!" });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Eroare interna de server." });
+      next(error);
+    }
+ 
 };
 
 module.exports = {
