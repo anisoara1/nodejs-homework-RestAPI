@@ -1,18 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const { auth } = require("../../middlewares/auth"); 
+const { auth } = require("../../middlewares/auth");
 const controller = require("../../controllers");
 const multer = require("multer");
 const path = require("path");
-
-
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "public/avatars");
   },
   filename: function (req, file, cb) {
-    console.log(file)
+    console.log(file);
     cb(
       null,
       file.fieldname + "-" + Date.now() + path.extname(file.originalname)
@@ -41,14 +39,26 @@ router.delete("/contacts/:contactId", controller.remove);
 router.put("/contacts/:contactId", controller.change);
 router.patch("/contacts/:contactId/favorite", controller.update);
 
-
-router.get("/users", controller.getUsers); 
+router.get("/users", controller.getUsers);
 router.post("/users/signup", controller.userSignup);
 router.post("/users/login", controller.userLogin);
-router.get("/users/logout", auth ,controller.userLogout);
+router.get("/users/logout", auth, controller.userLogout);
 router.get("/users/current", auth, controller.currentUser);
-router.patch("/users/:userId/subscription",  auth,  controller.updateSubscription);
-router.patch("/users/avatars", auth,  upload.single("avatar"), controller.updateAvatar);
-
+router.get(
+  "/account/verify/:verificationToken",
+  controller.verifyEmailController
+);
+router.post("/users/verify", controller.userLogin);
+router.patch(
+  "/users/:userId/subscription",
+  auth,
+  controller.updateSubscription
+);
+router.patch(
+  "/users/avatars",
+  auth,
+  upload.single("avatar"),
+  controller.updateAvatar
+);
 
 module.exports = router;

@@ -16,18 +16,17 @@ const userSchema = new Schema({
     },
     avatarUrl: {
       type: String,
-  },
-    subscription: {
-      type: String,
-      enum: ["starter", "pro", "business"],
-      default: "starter"
     },
-    token: {
-      type: String,
-      default: null,
-    },
-
-});
+      verify: {
+        type: Boolean,
+        default: false,
+      },
+      verificationToken: {
+        type: String,
+        required: [true, 'Verify token is required'],
+      },
+    }
+);
 
 userSchema.methods.setPassword = function (password) {
   console.log(this);
@@ -38,6 +37,11 @@ userSchema.methods.setPassword = function (password) {
 userSchema.methods.validPassword = function (password) {
   return bCrypt.compareSync(password, this.password);
 };
+
+userSchema.methods.validPassword = function (password) {
+  return bCrypt.compareSync(password, this.password);
+};
+
 
 userSchema.pre("save", function (next) {
   if (!this.avatarUrl) {

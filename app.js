@@ -1,26 +1,29 @@
-const express = require("express");
+ const express = require("express");
  const cors = require("cors");
-const morgan = require("morgan"); 
+ const morgan = require("morgan"); 
  const mongoose = require("mongoose"); 
  const dotenv = require("dotenv"); 
  const path = require("path");  
-
+ const sgMail = require("@sendgrid/mail"); 
+ 
  dotenv.config();
 
 require("./middlewares/passportConfig.js");
 
- const routerApi = require("./routes/api/index.js");
+const routerApi = require("./routes/api/index.js");
 const coreOptions = require("./cors.js");
 
 const app = express();
 
 app.use(express.json());
- app.use(cors(coreOptions));
+app.use(cors(coreOptions));
 app.use(morgan("tiny"));
 
 app.use("/api", routerApi); 
 
 app.use(express.static(path.join(__dirname, "public")));
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 app.use((_, res, __) => {
   res.status(404).json({

@@ -1,10 +1,6 @@
-
-
 const Contact = require("./schemas/ContactSchema");
 const User = require("./schemas/UserSchema");
-const gravatar  = require ("gravatar")
-const bcryptjs = require("bcryptjs")
-
+const sgMail = require("@sendgrid/mail");
 
 const getContacts = async () => {
   return Contact.find();
@@ -31,14 +27,11 @@ const updateContact = async (id, favoriteUpdate) => {
   console.log(id, favoriteUpdate);
   console.log(favoriteUpdate);
   return Contact.findByIdAndUpdate(
-   {_id:id},
+    { _id: id },
     { $set: favoriteUpdate },
     { new: true }
   );
 };
-
-
-
 
 const getUsers = async () => {
   return User.find();
@@ -51,8 +44,29 @@ const createUser = async ({ email, password }) => {
     if (userExistent) {
       throw new Error("Acest email exista deja.");
     }
-    const hash = bcryptjs.hashSync(password, 12);
-    const newUser = new User({ email, password:hash,  avatarURL: gravatar.url(email)});
+
+    const codUnicDeVerificare = String(Date.now());
+
+    const msg = {
+      to: email,
+      from: "todea.anisoara@gmail.com",
+      subject: "Email de verificare cont!",
+      text: `Codul de verificare este ${codUnicDeVerificare} / http://localhost:3000/api/account/verify/${codUnicDeVerificare}`,
+    };
+
+    sgMail
+      .send(msg)
+      .then(() => console.log("Email trimis"))
+      .catch(() => {
+        throw new Error("Eroare la trimitere");
+      });
+
+    const newUser = new User({
+      email,
+      password,
+      verificationToken: codUnicDeVerificare,
+    });
+    newUser.setPassword(password);
     return await newUser.save();
   } catch (error) {
     console.log(error);
@@ -75,26 +89,42 @@ const userExists = async ({ email, password }) => {
       throw new Error("Email sau parola gresita!");
     }
 
+    if (!user.verify) {
+      throw new Error("Trebuie sa iti verifici contul de email");
+    }
+
     return user;
   } catch (error) {
     console.log(error);
   }
 };
 
-
 const updateUser = async (id, token) => {
   console.log(id, token);
   console.log(token);
-  return User.findByIdAndUpdate(
-   {_id:id},
-    { $set: token },
-    { new: true }
-  );
+  return User.findByIdAndUpdate({ _id: id }, { $set: token }, { new: true });
 };
 
 const userName = async (user) => {
-  const result = await User.findOne({ email: user.email },{subscription:user.subscription});
+  const result = await User.findOne(
+    { email: user.email },
+    { subscription: user.subscription }
+  );
   return result;
+};
+
+const verifyEmail = async (verificationToken) => {
+  const update = { verify: true, verificationToken: null };
+
+  const result = await User.findOneAndUpdate(
+    {
+      verificationToken,
+    },
+    { $set: update },
+    { new: true }
+  );
+  console.log(result);
+  if (!result) throw new Error("userul nu exista");
 };
 
 module.exports = {
@@ -109,4 +139,5 @@ module.exports = {
   updateUser,
   userExists,
   userName,
+  verifyEmail,
 };
