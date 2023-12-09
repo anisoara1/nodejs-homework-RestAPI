@@ -274,37 +274,6 @@ const currentUser = async (req, res, next) => {
   }
 };
 
-/* const updateAvatar = async (req, res, next) => {
-  console.log("test");
-  try {
-    if (!req.file) {
-      return res.status(404).json({ error: "Nu exista fisier de incarcat!" });
-    }
-
-    const image = await Jimp.read(req.file.path);
-    await image.resize(250, 250).writeAsync(req.file.path);
-
-    const uniqFilename = `${req.user._id}-${Date.now()}${path.extname(
-      req.file.originalname
-    )}`;
-
-    const destinationPath = path.join(
-      __dirname,
-      `/avatar${uniqFilename}`
-    );
-    fs.renameSync(req.file.path, destinationPath);
-    req.user.avatarUrl = `temp/${uniqFilename}`;
-    await req.user.save();
-
-    res.status(200).json({ avatarUrl: req.user.avatarUrl });
-  } catch (error) {
-    
-    res.status(404).json({ error: error.message });
-    next(error);
-  }
-};  */
-
-
 const updateAvatar = async (req, res, next) => {
   console.log("test"); // Se afișează un mesaj de test în consolă.
 
@@ -322,7 +291,7 @@ const updateAvatar = async (req, res, next) => {
 
     const destinationPath = path.join(
       __dirname,
-      `/public/avatars/${uniqFilename}`
+      `../public/avatars/${uniqFilename}`
     ); // Se definește calea de destinație pentru fișierul final de avatar.
 
     // Utilizează Jimp pentru redimensionare, ajustarea calității și transformare în tonuri de gri
@@ -344,9 +313,8 @@ const updateAvatar = async (req, res, next) => {
       .catch((error) => {
         throw error; // Se aruncă o excepție în caz de eroare în timpul procesării imaginii cu Jimp.
       });
-      
+     
       if (req.user) {
-       
         req.user.avatarUrl = `/avatars/${uniqFilename}`;
         await req.user.save();
         res.status(200).json({ avatarUrl: req.user.avatarUrl });
@@ -357,9 +325,10 @@ const updateAvatar = async (req, res, next) => {
       console.error(error);
       res.status(500).json({ error: "Eroare interna de server." });
       next(error);
-    }
- 
-};
+    } 
+}; 
+
+
 
 module.exports = {
   get,
