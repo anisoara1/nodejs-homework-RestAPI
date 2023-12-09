@@ -20,7 +20,7 @@ app.use(morgan("tiny"));
 
 app.use("/api", routerApi); 
 
-app.use(express.static(path.join(__dirname, "public/avatars")));
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use((_, res, __) => {
   res.status(404).json({
