@@ -1,10 +1,12 @@
-const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-
-dotenv.config();
+ const express = require("express");
+ const cors = require("cors");
+ const morgan = require("morgan"); 
+ const mongoose = require("mongoose"); 
+ const dotenv = require("dotenv"); 
+ const path = require("path");  
+ const sgMail = require("@sendgrid/mail"); 
+ 
+ dotenv.config();
 
 require("./middlewares/passportConfig.js");
 
@@ -17,7 +19,11 @@ app.use(express.json());
 app.use(cors(coreOptions));
 app.use(morgan("tiny"));
 
-app.use("/api", routerApi);
+app.use("/api", routerApi); 
+
+app.use(express.static(path.join(__dirname, "public")));
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 app.use((_, res, __) => {
   res.status(404).json({
@@ -36,9 +42,9 @@ app.use((err, _, res, __) => {
     message: err.message,
     data: "Internal Server Error",
   });
-});
+}); 
 
-const PORT = process.env.PORT_SERVER || 4000;
+ const PORT = process.env.PORT_SERVER || 3000;
 const URL_DB = process.env.URL_DB;
 
 mongoose
@@ -51,4 +57,5 @@ mongoose
   })
   .catch((err) => {
     console.log(`Serverul nu realza. Eroare:${err.message}`);
-  });
+  }); 
+
